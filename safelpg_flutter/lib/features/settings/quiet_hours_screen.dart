@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/safe_lpg_button.dart';
 import 'widgets/quiet_hours_preview.dart';
@@ -17,7 +18,9 @@ class QuietHoursScreen extends StatelessWidget {
         titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left, color: AppTheme.textPrimary, size: 28),
-          onPressed: () {},
+          onPressed: () {
+            if (context.canPop()) context.pop();
+          },
         ),
         title: const Text(
           'Quiet Hours',

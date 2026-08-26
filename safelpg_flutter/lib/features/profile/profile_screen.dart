@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/safe_lpg_card.dart';
-import '../dashboard/widgets/bottom_nav_bar.dart';
 import 'widgets/profile_header.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -166,7 +165,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const BottomNavBar(),
           ],
         ),
       ),

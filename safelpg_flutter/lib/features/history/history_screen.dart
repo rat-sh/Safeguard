@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../dashboard/widgets/bottom_nav_bar.dart';
 import 'widgets/history_segmented_control.dart';
 import 'widgets/gas_level_chart.dart';
 import 'widgets/history_summary_cards.dart';
@@ -63,7 +62,6 @@ class HistoryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const BottomNavBar(),
           ],
         ),
       ),

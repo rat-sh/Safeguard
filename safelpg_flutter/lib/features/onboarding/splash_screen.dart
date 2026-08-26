@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -115,7 +116,7 @@ class SplashScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 64),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.go('/login'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppTheme.primary,

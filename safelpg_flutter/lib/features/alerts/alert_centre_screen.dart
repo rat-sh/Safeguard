@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../dashboard/widgets/bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
 import 'widgets/alert_filter_chips.dart';
 import 'widgets/alert_card.dart';
 
@@ -56,7 +56,7 @@ class AlertCentreScreen extends StatelessWidget {
                     title: 'High Gas Concentration',
                     description: 'Regulator OFF + Gas level above 25% LEL. Immediate action required.',
                     time: '10:42 AM',
-                    onTap: () {},
+                    onTap: () => context.go('/alerts/detail'),
                   ),
                   AlertCard(
                     severity: 'warning',
@@ -82,7 +82,6 @@ class AlertCentreScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const BottomNavBar(), // Re-using from Dashboard features for visual only
           ],
         ),
       ),

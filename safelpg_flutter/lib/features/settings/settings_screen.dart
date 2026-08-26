@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
-import '../dashboard/widgets/bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/contact_list_item.dart';
 import 'widgets/quiet_hours_preview.dart';
@@ -87,17 +87,19 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     // Add contact button
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    GestureDetector(
+                      onTap: () => context.go('/settings/add-contact'),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         border: Border.all(color: AppTheme.primary, width: 1.5),
                         borderRadius: BorderRadius.circular(16),
                         color: const Color(0xFFCCFBF1),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: const [
                           Icon(Icons.add, color: AppTheme.primary, size: 18),
                           SizedBox(width: 6),
                           Text('Add Emergency Contact', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.primary)),
@@ -132,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
                           'icon': Icons.bedtime_outlined,
                           'iconBg': const Color(0xFFF1F5F9),
                           'iconColor': AppTheme.textSecondary,
-                          'onTap': () {},
+                          'onTap': () => context.go('/settings/quiet-hours'),
                         },
                       ],
                     ),
@@ -207,7 +209,6 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const BottomNavBar(),
           ],
         ),
       ),

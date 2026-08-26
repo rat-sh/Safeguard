@@ -5,7 +5,7 @@ import 'widgets/gas_level_card.dart';
 import 'widgets/system_state_card.dart';
 import 'widgets/quick_actions.dart';
 import 'widgets/recent_activity_card.dart';
-import 'widgets/bottom_nav_bar.dart';
+import 'widgets/recent_activity_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -34,7 +34,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const BottomNavBar(),
           ],
         ),
       ),

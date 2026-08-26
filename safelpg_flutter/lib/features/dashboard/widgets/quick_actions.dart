@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 class QuickActions extends StatelessWidget {
@@ -8,18 +9,20 @@ class QuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildActionCard('Silence Alert', Icons.volume_off, const Color(0xFF0F766E), const Color(0xFFCCFBF1)),
+        _buildActionCard(context, 'Silence Alert', Icons.volume_off, const Color(0xFF0F766E), const Color(0xFFCCFBF1)),
         const SizedBox(width: 12),
-        _buildActionCard('Emergency', Icons.phone, AppTheme.critical, const Color(0xFFFEE2E2)),
+        _buildActionCard(context, 'Emergency', Icons.phone, AppTheme.critical, const Color(0xFFFEE2E2)),
         const SizedBox(width: 12),
-        _buildActionCard('View History', Icons.history, AppTheme.textPrimary, const Color(0xFFF1F5F9)),
+        _buildActionCard(context, 'View History', Icons.history, AppTheme.textPrimary, const Color(0xFFF1F5F9), route: '/history'),
       ],
     );
   }
 
-  Widget _buildActionCard(String label, IconData icon, Color iconColor, Color bgColor) {
+  Widget _buildActionCard(BuildContext context, String label, IconData icon, Color iconColor, Color bgColor, {String? route}) {
     return Expanded(
-      child: Container(
+      child: GestureDetector(
+        onTap: route != null ? () => context.go(route) : null,
+        child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: AppTheme.surface,
@@ -52,6 +55,7 @@ class QuickActions extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
                 height: 1.2,
+              ),
               ),
             ),
           ],

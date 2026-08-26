@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/safe_lpg_button.dart';
 
@@ -133,7 +134,7 @@ class LoginScreen extends StatelessWidget {
               
               SafeLPGButton(
                 text: 'Send OTP',
-                onPressed: () {},
+                onPressed: () => context.go('/otp'),
                 variant: ButtonVariant.primary,
               ),
               
