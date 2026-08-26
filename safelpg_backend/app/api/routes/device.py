@@ -24,3 +24,13 @@ async def get_device_status(device_id: str):
         return status
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{device_id}/latest-data", response_model=SensorReading)
+async def get_latest_data(device_id: str):
+    """
+    Get the most recent sensor reading for a specific device.
+    """
+    data = device_service.get_latest_sensor_data(device_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="No data found for device")
+    return data

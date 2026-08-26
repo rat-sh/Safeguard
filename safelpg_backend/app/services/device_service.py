@@ -6,12 +6,18 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+# In-memory store for latest data (fallback)
+_latest_data_db: dict[str, SensorReading] = {}
+
 def process_sensor_data(data: SensorReading) -> dict:
     """
     Process incoming sensor data.
     Saves to Supabase if available.
     Calls AI service for analysis and Alert service if needed.
     """
+    # 0. Cache in memory for quick retrieval
+    _latest_data_db[data.device_id] = data
+
     # 1. Save sensor reading to Supabase (if configured)
     if supabase_client:
         try:
@@ -56,3 +62,17 @@ def get_device_status(device_id: str) -> DeviceStatus:
         battery_level=76,
         last_heartbeat=datetime.now()
     )
+
+def get_latest_sensor_data(device_id: str) -> Optional[SensorReading]:
+    """
+    Retrieve the most recent sensor reading for a device.
+    """
+    if supabase_client:
+        try:
+            response = supabase_client.table("sensor_readings").select("*").eq("device_id", device_id).order("timestamp", desc=True).limit(1).execute()
+            if response.data:
+                return SensorReading(**response.data[0])
+        except Exception as e:
+            logger.error(f"Failed to fetch latest data from Supabase: {e}")
+            
+    return _latest_data_db.get(device_id)

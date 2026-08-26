@@ -39,19 +39,28 @@ def create_alert(alert_data: AlertCreate) -> AlertResponse:
         
     return alert
 
-def get_all_alerts() -> List[AlertResponse]:
+def get_all_alerts(device_id: Optional[str] = None, limit: int = 50) -> List[AlertResponse]:
     """
     Retrieve all alerts from Supabase, fallback to in-memory store.
     """
     if supabase_client:
         try:
-            response = supabase_client.table("alerts").select("*").order("created_at", desc=True).execute()
+            query = supabase_client.table("alerts").select("*")
+            if device_id:
+                query = query.eq("device_id", device_id)
+                
+            response = query.order("created_at", desc=True).limit(limit).execute()
             return [AlertResponse(**item) for item in response.data]
         except Exception as e:
             logger.error(f"Failed to fetch alerts from Supabase: {e}")
             
     # Fallback
-    return sorted(list(_alerts_db.values()), key=lambda a: a.created_at, reverse=True)
+    alerts = list(_alerts_db.values())
+    if device_id:
+        alerts = [a for a in alerts if a.device_id == device_id]
+        
+    alerts.sort(key=lambda a: a.created_at, reverse=True)
+    return alerts[:limit]
 
 def get_alert_by_id(alert_id: str) -> Optional[AlertResponse]:
     """
