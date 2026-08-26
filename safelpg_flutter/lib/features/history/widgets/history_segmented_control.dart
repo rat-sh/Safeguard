@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
-class HistorySegmentedControl extends StatefulWidget {
-  const HistorySegmentedControl({super.key});
+class HistorySegmentedControl extends StatelessWidget {
+  final String selectedPeriod;
+  final ValueChanged<String> onPeriodChanged;
 
-  @override
-  State<HistorySegmentedControl> createState() => _HistorySegmentedControlState();
-}
+  const HistorySegmentedControl({
+    super.key,
+    required this.selectedPeriod,
+    required this.onPeriodChanged,
+  });
 
-class _HistorySegmentedControlState extends State<HistorySegmentedControl> {
-  final List<String> segments = ['24H', '7D', '30D', '90D'];
-  String selected = '7D';
+  static const List<String> segments = ['24H', '7D', '30D', '90D'];
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +23,10 @@ class _HistorySegmentedControlState extends State<HistorySegmentedControl> {
       ),
       child: Row(
         children: segments.map((segment) {
-          final isSelected = segment == selected;
+          final isSelected = segment == selectedPeriod;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => selected = segment),
+              onTap: () => onPeriodChanged(segment),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 padding: const EdgeInsets.symmetric(vertical: 8),

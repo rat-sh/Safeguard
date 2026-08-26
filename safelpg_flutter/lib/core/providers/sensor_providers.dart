@@ -27,3 +27,29 @@ final activeAlertsProvider = StreamProvider.family<List<AlertModel>, String>(
         .map((rows) => rows.map(AlertModel.fromMap).toList());
   },
 );
+
+/// Async provider for historical sensor readings over a time window.
+/// [key] is "$deviceId|$period" e.g. "abc123|7D"
+final historicalReadingsProvider =
+    FutureProvider.family<List<SensorReading>, String>(
+  (ref, key) async {
+    final parts = key.split('|');
+    final deviceId = parts[0];
+    final period = parts.length > 1 ? parts[1] : '7D';
+    final svc = ref.read(supabaseServiceProvider);
+    return svc.getHistoricalReadings(deviceId, period);
+  },
+);
+
+/// Async provider for resolved + unresolved alerts over a time window.
+/// [key] is "$deviceId|$period"
+final historicalAlertsProvider =
+    FutureProvider.family<List<AlertModel>, String>(
+  (ref, key) async {
+    final parts = key.split('|');
+    final deviceId = parts[0];
+    final period = parts.length > 1 ? parts[1] : '7D';
+    final svc = ref.read(supabaseServiceProvider);
+    return svc.getHistoricalAlerts(deviceId, period);
+  },
+);

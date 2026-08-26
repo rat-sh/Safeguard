@@ -5,8 +5,20 @@ import 'widgets/gas_level_chart.dart';
 import 'widgets/history_summary_cards.dart';
 import 'widgets/event_log_list.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  static const String _deviceId = String.fromEnvironment(
+    'DEVICE_ID',
+    defaultValue: 'default-device',
+  );
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  String _selectedPeriod = '7D';
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +54,14 @@ class HistoryScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                   ),
                   const SizedBox(height: 12),
-                  const HistorySegmentedControl(),
+                  HistorySegmentedControl(
+                    selectedPeriod: _selectedPeriod,
+                    onPeriodChanged: (newPeriod) {
+                      setState(() {
+                        _selectedPeriod = newPeriod;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -51,13 +70,22 @@ class HistoryScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  children: const [
-                    GasLevelChart(),
-                    SizedBox(height: 16),
-                    HistorySummaryCards(),
-                    SizedBox(height: 16),
-                    EventLogList(),
-                    SizedBox(height: 8),
+                  children: [
+                    GasLevelChart(
+                      deviceId: HistoryScreen._deviceId,
+                      period: _selectedPeriod,
+                    ),
+                    const SizedBox(height: 16),
+                    HistorySummaryCards(
+                      deviceId: HistoryScreen._deviceId,
+                      period: _selectedPeriod,
+                    ),
+                    const SizedBox(height: 16),
+                    EventLogList(
+                      deviceId: HistoryScreen._deviceId,
+                      period: _selectedPeriod,
+                    ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
