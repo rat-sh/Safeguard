@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Logo Row
               Row(
                 children: [
-                  const Icon(Icons.security, color: AppTheme.primary, size: 32),
+                  const Icon(Icons.gpp_good, color: AppTheme.primary, size: 32),
                   const SizedBox(width: 8),
                   Text(
                     'SafeLPG',

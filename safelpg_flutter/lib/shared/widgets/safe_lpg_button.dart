@@ -51,6 +51,7 @@ class SafeLPGButton extends StatelessWidget {
       foregroundColor: textColor,
       elevation: 0,
       shadowColor: Colors.transparent,
+      overlayColor: textColor.withOpacity(0.12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: borderSide ?? BorderSide.none,

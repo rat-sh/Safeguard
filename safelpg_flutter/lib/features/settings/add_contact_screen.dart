@@ -4,8 +4,17 @@ import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/safe_lpg_button.dart';
 import '../../shared/widgets/safe_lpg_input.dart';
 
-class AddContactScreen extends StatelessWidget {
+class AddContactScreen extends StatefulWidget {
   const AddContactScreen({super.key});
+
+  @override
+  State<AddContactScreen> createState() => _AddContactScreenState();
+}
+
+class _AddContactScreenState extends State<AddContactScreen> {
+  int _priority = 1;
+  bool _phoneCallEnabled = true;
+  bool _smsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -115,15 +124,74 @@ class AddContactScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
+                    // Priority Selector
+                    const Text(
+                      'ALERT PRIORITY',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textSecondary, letterSpacing: 0.8),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [1, 2, 3].map((p) {
+                        final isSelected = _priority == p;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: p < 3 ? 8 : 0),
+                            child: GestureDetector(
+                              onTap: () => setState(() => _priority = p),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFFCCFBF1) : AppTheme.surface,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isSelected ? AppTheme.primary : AppTheme.border,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '#$p',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Priority #1 is contacted first during emergencies',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 24),
+
                     // Notification toggles
                     const Text(
                       'NOTIFY VIA',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textSecondary, letterSpacing: 0.8),
                     ),
                     const SizedBox(height: 8),
-                    _buildToggleRow(Icons.phone_outlined, 'Phone Call', 'During critical alerts', true),
+                    _buildToggleRow(
+                      Icons.phone_outlined,
+                      'Phone Call',
+                      'During critical alerts',
+                      _phoneCallEnabled,
+                      (v) => setState(() => _phoneCallEnabled = v),
+                    ),
                     const Divider(height: 1, thickness: 1, color: AppTheme.border),
-                    _buildToggleRow(Icons.sms_outlined, 'SMS Message', 'For all warning-level events', true),
+                    _buildToggleRow(
+                      Icons.sms_outlined,
+                      'SMS Message',
+                      'For all warning-level events',
+                      _smsEnabled,
+                      (v) => setState(() => _smsEnabled = v),
+                    ),
 
                     const SizedBox(height: 20),
                     Container(
@@ -172,7 +240,9 @@ class AddContactScreen extends StatelessWidget {
                   Expanded(
                     child: SafeLPGButton(
                       text: 'Save Contact',
-                      onPressed: () {},
+                      onPressed: () {
+                        if (context.canPop()) context.pop();
+                      },
                       variant: ButtonVariant.primary,
                     ),
                   ),
@@ -185,7 +255,13 @@ class AddContactScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToggleRow(IconData icon, String label, String subtitle, bool value) {
+  Widget _buildToggleRow(
+    IconData icon,
+    String label,
+    String subtitle,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -201,7 +277,7 @@ class AddContactScreen extends StatelessWidget {
               ],
             ),
           ),
-          Switch(value: value, onChanged: null, activeColor: AppTheme.primary),
+          Switch(value: value, onChanged: onChanged, activeColor: AppTheme.primary),
         ],
       ),
     );

@@ -6,6 +6,7 @@ class SafeLPGCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color? color;
   final Border? border;
+  final VoidCallback? onTap;
 
   const SafeLPGCard({
     super.key,
@@ -13,15 +14,17 @@ class SafeLPGCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.color,
     this.border,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final borderRadius = BorderRadius.circular(16);
+    final cardContent = Container(
       padding: padding,
       decoration: BoxDecoration(
         color: color ?? AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: borderRadius,
         border: border,
         boxShadow: const [
           BoxShadow(
@@ -34,5 +37,19 @@ class SafeLPGCard extends StatelessWidget {
       ),
       child: child,
     );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        borderRadius: borderRadius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadius,
+          child: cardContent,
+        ),
+      );
+    }
+
+    return cardContent;
   }
 }
