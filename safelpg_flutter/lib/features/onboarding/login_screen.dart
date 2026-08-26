@@ -3,8 +3,32 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/safe_lpg_button.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _phoneController = TextEditingController();
+  final FocusNode _phoneFocus = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneFocus.addListener(() {
+      setState(() => _isFocused = _phoneFocus.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _phoneFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +44,7 @@ class LoginScreen extends StatelessWidget {
               // Logo Row
               Row(
                 children: [
-                  const Icon(
-                    Icons.security,
-                    color: AppTheme.primary,
-                    size: 32,
-                  ),
+                  const Icon(Icons.security, color: AppTheme.primary, size: 32),
                   const SizedBox(width: 8),
                   Text(
                     'SafeLPG',
@@ -36,7 +56,7 @@ class LoginScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 40),
-              
+
               const Text(
                 'Welcome back',
                 style: TextStyle(
@@ -48,13 +68,10 @@ class LoginScreen extends StatelessWidget {
               const SizedBox(height: 4),
               const Text(
                 'Enter your mobile number to continue',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppTheme.textSecondary,
-                ),
+                style: TextStyle(fontSize: 15, color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 40),
-              
+
               const Text(
                 'Mobile Number',
                 style: TextStyle(
@@ -64,13 +81,26 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              
-              // Custom Input mimicking the Figma design
-              Container(
+
+              // Phone input with country code
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
                   color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.border),
+                  border: Border.all(
+                    color: _isFocused ? AppTheme.primary : AppTheme.border,
+                    width: _isFocused ? 2 : 1,
+                  ),
+                  boxShadow: _isFocused
+                      ? [
+                          BoxShadow(
+                            color: AppTheme.primary.withOpacity(0.08),
+                            blurRadius: 0,
+                            spreadRadius: 3,
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Row(
                   children: [
@@ -95,23 +125,19 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: AppTheme.textSecondary,
-                          ),
+                          Icon(Icons.chevron_right, size: 16, color: AppTheme.textSecondary),
                         ],
                       ),
                     ),
                     Expanded(
-                      child: TextFormField(
-                        initialValue: '98765 43210',
+                      child: TextField(
+                        controller: _phoneController,
+                        focusNode: _phoneFocus,
                         keyboardType: TextInputType.phone,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: const TextStyle(fontSize: 15, color: AppTheme.textPrimary),
                         decoration: const InputDecoration(
+                          hintText: '98765 43210',
+                          hintStyle: TextStyle(color: AppTheme.disabled),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(horizontal: 16),
                         ),
@@ -120,7 +146,7 @@ class LoginScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 12),
               const Text(
                 'We will send a 6-digit OTP to verify your identity. Standard SMS rates may apply.',
@@ -131,15 +157,15 @@ class LoginScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               SafeLPGButton(
                 text: 'Send OTP',
                 onPressed: () => context.go('/otp'),
                 variant: ButtonVariant.primary,
               ),
-              
+
               const Spacer(),
-              
+
               Center(
                 child: RichText(
                   textAlign: TextAlign.center,

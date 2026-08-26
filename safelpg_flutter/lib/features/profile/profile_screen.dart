@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../shared/widgets/safe_lpg_card.dart';
-import 'widgets/profile_header.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -13,154 +12,250 @@ class ProfileScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // AppBar
+            // AppBar with back button
             Container(
               color: AppTheme.surface,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    'My Profile',
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left,
+                        color: AppTheme.textPrimary, size: 28),
+                    onPressed: () {
+                      if (context.canPop()) context.pop();
+                    },
+                  ),
+                  const Text(
+                    'Profile',
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  Icon(Icons.settings_outlined, color: AppTheme.textSecondary, size: 24),
+                  const Spacer(),
+                  const SizedBox(width: 48),
                 ],
               ),
             ),
             const Divider(height: 1, thickness: 1, color: AppTheme.border),
             Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Profile header (avatar + stats)
-                    const ProfileHeader(),
-                    const Divider(height: 1, thickness: 1, color: AppTheme.border),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    // ── User card ─────────────────────────────────────────
+                    _buildCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
                         children: [
-                          // Account Details card
-                          const Text(
-                            'ACCOUNT DETAILS',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SafeLPGCard(
-                            padding: EdgeInsets.zero,
-                            child: Column(
-                              children: [
-                                _buildInfoRow('Full Name', 'Riya Kumar', Icons.person_outline),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Mobile Number', '+91 98765 43210', Icons.phone_outlined),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Member Since', 'March 2024', Icons.calendar_today_outlined),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Safety Grade', 'Grade A — Excellent', Icons.verified_outlined,
-                                    valueColor: AppTheme.success),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Registered Devices
-                          const Text(
-                            'REGISTERED DEVICES',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildDeviceCard(
-                            name: 'Cylinder A',
-                            location: 'Kitchen',
-                            status: 'Online',
-                            statusColor: AppTheme.success,
-                            firmware: 'v2.1.4',
-                          ),
-                          const SizedBox(height: 12),
-                          _buildDeviceCard(
-                            name: 'Cylinder B',
-                            location: 'Balcony',
-                            status: 'Offline',
-                            statusColor: AppTheme.disabled,
-                            firmware: 'v2.0.9',
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Activity summary
-                          const Text(
-                            'ACTIVITY SUMMARY',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SafeLPGCard(
-                            padding: EdgeInsets.zero,
-                            child: Column(
-                              children: [
-                                _buildInfoRow('Total Alerts (30d)', '7 events', Icons.warning_amber_rounded,
-                                    valueColor: AppTheme.warning),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Critical Alerts (30d)', '1 event', Icons.error_outline,
-                                    valueColor: AppTheme.critical),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Safe Days Streak', '12 days', Icons.local_fire_department_outlined,
-                                    valueColor: AppTheme.success),
-                                const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9), indent: 56),
-                                _buildInfoRow('Avg Gas Level', '13.4% LEL', Icons.sensors, valueColor: AppTheme.primary),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Sign out
-                          GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEE2E2),
-                                borderRadius: BorderRadius.circular(16),
+                          // Gradient avatar — teal gradient per Figma
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color(0xFF0F766E),
+                                  Color(0xFF134E4A),
+                                ],
                               ),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.logout, color: AppTheme.critical, size: 18),
-                                  SizedBox(width: 8),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'RK',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Rajesh Kumar',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                              const Text(
+                                '+91 98765 43210',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              // Account Verified status
+                              Row(
+                                children: const [
+                                  CircleAvatar(
+                                    radius: 4,
+                                    backgroundColor: AppTheme.success,
+                                  ),
+                                  SizedBox(width: 6),
                                   Text(
-                                    'Sign Out',
+                                    'Account Verified',
                                     style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.critical,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.success,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
+
+                    // ── Linked Device card ────────────────────────────────
+                    _buildCard(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Linked Device',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFCCFBF1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.security,
+                                    color: AppTheme.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      'SafeLPG Sensor v2.1',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      'ID: SLP-2024-KA-00142 · Kitchen',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppTheme.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'Online',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.success,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // ── Menu items card ───────────────────────────────────
+                    _buildCard(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          _buildMenuItem(
+                            icon: Icons.help_outline,
+                            label: 'Help & Support',
+                            subtitle: 'FAQs, contact us',
+                            isFirst: true,
+                          ),
+                          const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Color(0xFFF1F5F9),
+                              indent: 56),
+                          _buildMenuItem(
+                            icon: Icons.lock_outline,
+                            label: 'Privacy Policy',
+                            subtitle: 'Data usage & permissions',
+                          ),
+                          const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Color(0xFFF1F5F9),
+                              indent: 56),
+                          _buildMenuItem(
+                            icon: Icons.info_outline,
+                            label: 'About SafeLPG',
+                            subtitle: 'Version 2.1.0',
+                            isLast: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ── Logout — outline style ────────────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => context.go('/login'),
+                        icon: const Icon(Icons.logout,
+                            color: AppTheme.critical, size: 16),
+                        label: const Text(
+                          'Logout',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.critical,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(
+                              color: AppTheme.critical, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -171,95 +266,80 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon, {Color? valueColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: AppTheme.textSecondary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: valueColor ?? AppTheme.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeviceCard({
-    required String name,
-    required String location,
-    required String status,
-    required Color statusColor,
-    required String firmware,
-  }) {
+  Widget _buildCard({required Widget child, EdgeInsets? padding}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      width: double.infinity,
+      padding: padding,
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(color: Color(0x0F0F172A), offset: Offset(0, 1), blurRadius: 8),
+          BoxShadow(
+              color: Color(0x0F0F172A), offset: Offset(0, 1), blurRadius: 8),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFFCCFBF1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.sensors, color: AppTheme.primary, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-                Text('$location · $firmware',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: statusColor,
+      child: child,
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    final radius = BorderRadius.only(
+      topLeft: Radius.circular(isFirst ? 16 : 0),
+      topRight: Radius.circular(isFirst ? 16 : 0),
+      bottomLeft: Radius.circular(isLast ? 16 : 0),
+      bottomRight: Radius.circular(isLast ? 16 : 0),
+    );
+    return Material(
+      color: AppTheme.surface,
+      borderRadius: radius,
+      child: InkWell(
+        onTap: () {},
+        borderRadius: radius,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 18, color: AppTheme.textSecondary),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                          fontSize: 12, color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right,
+                  color: Color(0xFFCBD5E1), size: 16),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
