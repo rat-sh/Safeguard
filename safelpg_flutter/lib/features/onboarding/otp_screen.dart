@@ -155,12 +155,12 @@ class _OtpScreenState extends State<OtpScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(_otpLength, (i) {
                   final filled = _controllers[i].text.isNotEmpty;
-                  return Padding(
-                    padding: EdgeInsets.only(right: i < _otpLength - 1 ? 10 : 0),
-                    child: SizedBox(
-                      width: 46,
-                      height: 56,
-                      child: KeyboardListener(
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: i < _otpLength - 1 ? 8 : 0),
+                      child: SizedBox(
+                        height: 56,
+                        child: KeyboardListener(
                         focusNode: FocusNode(),
                         onKeyEvent: (e) => _onKeyEvent(i, e),
                         child: TextField(

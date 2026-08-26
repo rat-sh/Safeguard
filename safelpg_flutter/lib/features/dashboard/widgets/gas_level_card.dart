@@ -50,12 +50,17 @@ class GasLevelCard extends StatelessWidget {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                CustomPaint(
-                  size: const Size(220, 110),
-                  painter: ArcGaugePainter(
-                    percentage: 18,
-                    color: AppTheme.warning,
-                  ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth > 220.0 ? 220.0 : constraints.maxWidth;
+                    return CustomPaint(
+                      size: Size(width, width / 2),
+                      painter: ArcGaugePainter(
+                        percentage: 18,
+                        color: AppTheme.warning,
+                      ),
+                    );
+                  }
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
