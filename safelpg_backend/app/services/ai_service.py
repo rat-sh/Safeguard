@@ -1,8 +1,12 @@
 from app.models.schemas import SensorReading
 
+# Detection Thresholds
+THRESHOLD_CRITICAL = 25.0
+THRESHOLD_WARNING = 15.0
+
 def analyze_sensor_data(data: SensorReading) -> dict:
     """
-    Analyze sensor reading using basic HAT-LPG style rules.
+    Analyze sensor reading using HAT-LPG style rules.
     """
     gas = data.gas_level
     reg_off = not data.regulator_state
@@ -12,22 +16,34 @@ def analyze_sensor_data(data: SensorReading) -> dict:
     message = "Gas levels are normal."
     should_create_alert = False
 
-    # Logic rules based on gas level, regulator state, and human presence
-    if gas >= 25.0:
-        severity = "critical"
-        should_create_alert = True
-        if reg_off:
-            message = "High gas concentration detected with regulator OFF. Immediate action required."
-        else:
-            message = "High gas concentration detected. Consider turning off the regulator."
-    elif gas >= 15.0:
+    # 1. Elevated Gas (Warning level)
+    if gas >= THRESHOLD_WARNING and gas < THRESHOLD_CRITICAL:
         severity = "warning"
         should_create_alert = True
-        if presence:
-            message = "Elevated gas level detected. Human presence detected in area."
+        
+        # Modifier: Regulator is OFF but gas is elevated. 
+        # This indicates a potential leak independent of the regulator.
+        if reg_off:
+            severity = "critical"
+            message = "Elevated gas detected while regulator is OFF. Possible severe leak. Immediate check required."
+        # Modifier: Human presence adds urgency.
+        elif presence:
+            message = "Elevated gas level detected. Human presence detected in area. Please ventilate immediately."
         else:
-            message = "Elevated gas level detected."
-            
+            message = "Elevated gas level detected. Monitor closely."
+
+    # 2. High Gas (Critical level)
+    elif gas >= THRESHOLD_CRITICAL:
+        severity = "critical"
+        should_create_alert = True
+        
+        if reg_off:
+            message = "CRITICAL: High gas concentration detected while regulator is OFF. Evacuate and seek help."
+        elif presence:
+            message = "CRITICAL: High gas concentration detected with human presence! Evacuate immediately."
+        else:
+            message = "CRITICAL: High gas concentration detected. Immediate action required."
+
     return {
         "severity": severity,
         "message": message,
