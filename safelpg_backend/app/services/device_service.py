@@ -54,13 +54,28 @@ def process_sensor_data(data: SensorReading) -> dict:
 def get_device_status(device_id: str) -> DeviceStatus:
     """
     Retrieve current status for a given device.
-    Currently returns a mock DeviceStatus.
+    Dynamically determines online status based on recent heartbeats.
     """
+    latest_data = get_latest_sensor_data(device_id)
+    
+    if not latest_data:
+        # If no data exists, assume offline with default heartbeat
+        return DeviceStatus(
+            device_id=device_id,
+            is_online=False,
+            battery_level=None,
+            last_heartbeat=datetime.min
+        )
+        
+    # Consider device online if the last reading was within the last 5 minutes (300s)
+    time_since_last = datetime.now() - latest_data.timestamp
+    is_online = time_since_last.total_seconds() < 300
+    
     return DeviceStatus(
         device_id=device_id,
-        is_online=True,
-        battery_level=76,
-        last_heartbeat=datetime.now()
+        is_online=is_online,
+        battery_level=latest_data.battery_level,
+        last_heartbeat=latest_data.timestamp
     )
 
 def get_latest_sensor_data(device_id: str) -> Optional[SensorReading]:
