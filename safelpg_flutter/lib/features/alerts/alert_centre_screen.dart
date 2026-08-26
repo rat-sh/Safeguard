@@ -1,75 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/models/sensor_models.dart';
+import '../../core/providers/sensor_providers.dart';
 import 'widgets/alert_card.dart';
 
-class _AlertData {
-  final String severity;
-  final String title;
-  final String description;
-  final String time;
-
-  const _AlertData({
-    required this.severity,
-    required this.title,
-    required this.description,
-    required this.time,
-  });
-}
-
-const _allAlerts = [
-  _AlertData(
-    severity: 'critical',
-    title: 'High Gas Concentration',
-    description: 'Regulator OFF + Gas level above 25% LEL. Immediate action required.',
-    time: '10:42 AM',
-  ),
-  _AlertData(
-    severity: 'warning',
-    title: 'Regulator Switched Off',
-    description: 'Gas regulator turned OFF while presence is detected in the kitchen.',
-    time: '09:58 AM',
-  ),
-  _AlertData(
-    severity: 'warning',
-    title: 'Battery Low',
-    description: 'Device battery at 18%. Connect to power source to avoid service interruption.',
-    time: '08:30 AM',
-  ),
-  _AlertData(
-    severity: 'info',
-    title: 'Morning Safety Check',
-    description: 'Automated daily safety scan completed. No anomalies found.',
-    time: '07:00 AM',
-  ),
-];
-
-class AlertCentreScreen extends StatefulWidget {
+class AlertCentreScreen extends ConsumerStatefulWidget {
   const AlertCentreScreen({super.key});
 
+  static const String _deviceId = String.fromEnvironment(
+    'DEVICE_ID',
+    defaultValue: 'default-device',
+  );
+
   @override
-  State<AlertCentreScreen> createState() => _AlertCentreScreenState();
+  ConsumerState<AlertCentreScreen> createState() => _AlertCentreScreenState();
 }
 
-class _AlertCentreScreenState extends State<AlertCentreScreen> {
+class _AlertCentreScreenState extends ConsumerState<AlertCentreScreen> {
   String _activeFilter = 'All';
   final _filters = ['All', 'Critical', 'Warning', 'Info'];
 
-  List<_AlertData> get _filteredAlerts {
-    if (_activeFilter == 'All') return _allAlerts;
-    return _allAlerts
-        .where((a) => a.severity == _activeFilter.toLowerCase())
+  List<AlertModel> _applyFilter(List<AlertModel> alerts) {
+    if (_activeFilter == 'All') return alerts;
+    return alerts
+        .where((a) => a.severity.name == _activeFilter.toLowerCase())
         .toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final alertsAsync =
+        ref.watch(activeAlertsProvider(AlertCentreScreen._deviceId));
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Column(
           children: [
-            // AppBar replacement
+            // Header
             Container(
               width: double.infinity,
               color: AppTheme.surface,
@@ -86,11 +56,13 @@ class _AlertCentreScreenState extends State<AlertCentreScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    '${_filteredAlerts.length} active alerts today',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
+                  alertsAsync.when(
+                    loading: () => const Text('Loading...'),
+                    error: (_, __) => const Text('—'),
+                    data: (alerts) => Text(
+                      '${_applyFilter(alerts).length} active alerts',
+                      style: const TextStyle(
+                          fontSize: 13, color: AppTheme.textSecondary),
                     ),
                   ),
                 ],
@@ -138,33 +110,65 @@ class _AlertCentreScreenState extends State<AlertCentreScreen> {
               ),
             ),
             const Divider(height: 1, thickness: 1, color: AppTheme.border),
+            // Alert list
             Expanded(
-              child: _filteredAlerts.isEmpty
-                  ? const Center(
+              child: alertsAsync.when(
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Error loading alerts: $e',
+                    style: const TextStyle(color: AppTheme.critical),
+                  ),
+                ),
+                data: (alerts) {
+                  final filtered = _applyFilter(alerts);
+                  if (filtered.isEmpty) {
+                    return const Center(
                       child: Text(
                         'No alerts in this category',
                         style: TextStyle(
                             fontSize: 14, color: AppTheme.textSecondary),
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _filteredAlerts.length,
-                      itemBuilder: (context, index) {
-                        final alert = _filteredAlerts[index];
-                        return AlertCard(
-                          severity: alert.severity,
-                          title: alert.title,
-                          description: alert.description,
-                          time: alert.time,
-                          onTap: () => context.go('/alerts/detail'),
-                        );
-                      },
-                    ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final alert = filtered[index];
+                      return AlertCard(
+                        severity: alert.severity.name,
+                        title: _alertTitle(alert.severity),
+                        description: alert.message,
+                        time: _formatTime(alert.createdAt),
+                        onTap: () => context.go('/alerts/detail'),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _alertTitle(AlertSeverity severity) {
+    switch (severity) {
+      case AlertSeverity.critical:
+        return 'Critical Alert';
+      case AlertSeverity.warning:
+        return 'Warning';
+      default:
+        return 'Info';
+    }
+  }
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
   }
 }

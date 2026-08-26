@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/models/sensor_models.dart';
+import '../../../core/providers/sensor_providers.dart';
 import '../../../shared/widgets/safe_lpg_card.dart';
 
-class RecentActivityCard extends StatelessWidget {
-  const RecentActivityCard({super.key});
+class RecentActivityCard extends ConsumerWidget {
+  final String deviceId;
+
+  const RecentActivityCard({super.key, required this.deviceId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alertsAsync = ref.watch(activeAlertsProvider(deviceId));
+
     return SafeLPGCard(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -33,14 +40,58 @@ class RecentActivityCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildActivityItem('Gas level rose above 15% LEL', '10:42 AM', AppTheme.warning),
-          const Divider(color: Color(0xFFF1F5F9), height: 16),
-          _buildActivityItem('System check passed — all normal', '09:15 AM', AppTheme.success),
-          const Divider(color: Color(0xFFF1F5F9), height: 16),
-          _buildActivityItem('Morning safety scan completed', '08:30 AM', AppTheme.primary),
+          alertsAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(8),
+              child: CircularProgressIndicator(),
+            ),
+            error: (e, _) => Text(
+              'Failed to load activity',
+              style: TextStyle(fontSize: 13, color: AppTheme.critical),
+            ),
+            data: (alerts) {
+              if (alerts.isEmpty) {
+                return const Text(
+                  'No recent activity — all clear!',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                );
+              }
+              final recent = alerts.take(3).toList();
+              return Column(
+                children: [
+                  for (var i = 0; i < recent.length; i++) ...[
+                    _buildActivityItem(
+                      recent[i].message,
+                      _formatTime(recent[i].createdAt),
+                      _severityColor(recent[i].severity),
+                    ),
+                    if (i < recent.length - 1)
+                      const Divider(color: Color(0xFFF1F5F9), height: 16),
+                  ],
+                ],
+              );
+            },
+          ),
         ],
       ),
     );
+  }
+
+  Color _severityColor(AlertSeverity severity) {
+    switch (severity) {
+      case AlertSeverity.critical:
+        return AppTheme.critical;
+      case AlertSeverity.warning:
+        return AppTheme.warning;
+      default:
+        return AppTheme.primary;
+    }
+  }
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$h:$m';
   }
 
   Widget _buildActivityItem(String text, String time, Color dotColor) {
@@ -62,19 +113,14 @@ class RecentActivityCard extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppTheme.textPrimary,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
             ),
           ),
           const SizedBox(width: 12),
           Text(
             time,
             style: const TextStyle(
-              fontSize: 12,
-              color: AppTheme.textSecondary,
-            ),
+                fontSize: 12, color: AppTheme.textSecondary),
           ),
         ],
       ),

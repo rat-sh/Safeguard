@@ -1,9 +1,16 @@
+/// All sensitive configuration is injected at compile time via --dart-define.
+/// Run the app with:
+///   flutter run \
+///     --dart-define=SUPABASE_URL=<your_url> \
+///     --dart-define=SUPABASE_ANON_KEY=<your_key> \
+///     --dart-define=FASTAPI_BASE_URL=http://<your_server_ip>:8000
 class AppConfig {
-  // Replace these with actual URLs and Keys.
-  // In production, these should be loaded from a .env file using flutter_dotenv.
-  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
-  
-  // The URL where your FastAPI backend is running
-  static const String fastapiBaseUrl = 'http://127.0.0.1:8000';
+  static const String supabaseUrl =
+      String.fromEnvironment('SUPABASE_URL');
+
+  static const String supabaseAnonKey =
+      String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  static const String fastapiBaseUrl =
+      String.fromEnvironment('FASTAPI_BASE_URL', defaultValue: 'http://10.0.2.2:8000');
 }
