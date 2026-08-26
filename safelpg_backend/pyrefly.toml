@@ -1,0 +1,6 @@
+# Pyrefly type checker configuration for SafeLPG backend
+# Points the linter to the virtual environment so it can find
+# pydantic, fastapi, supabase, and all other installed packages.
+
+[python]
+python_interpreter = "venv/bin/python"
