@@ -175,7 +175,7 @@ def get_latest_sensor_data(device_id: str) -> Optional[SensorReading]:
                 .execute()
             )
             if response.data:
-                return SensorReading(**response.data[0])
+                return SensorReading.model_validate(response.data[0])
         except Exception as e:
             logger.error(f"[{device_id}] Failed to fetch latest data from Supabase: {e}")
 
@@ -201,7 +201,7 @@ def get_historical_data(
             count_response = (
                 supabase_client
                 .table("sensor_readings")
-                .select("id", count="exact")
+                .select("id", count="exact")  # pyrefly: ignore[bad-argument-type]
                 .eq("device_id", device_id)
                 .execute()
             )
@@ -217,7 +217,7 @@ def get_historical_data(
                 .range(offset, offset + limit - 1)
                 .execute()
             )
-            readings = [SensorReadingResponse(**row) for row in data_response.data]
+            readings = [SensorReadingResponse.model_validate(row) for row in data_response.data]
             return readings, total
         except Exception as e:
             logger.error(f"[{device_id}] Failed to fetch historical data from Supabase: {e}")

@@ -84,7 +84,7 @@ def get_all_alerts(
                 query = query.eq("is_resolved", is_resolved)
 
             response = query.order("created_at", desc=True).limit(limit).execute()
-            return [AlertResponse(**item) for item in response.data]
+            return [AlertResponse.model_validate(item) for item in response.data]
         except Exception as e:
             logger.error(f"Failed to fetch alerts from Supabase: {e}")
 
@@ -113,7 +113,7 @@ def get_alert_by_id(alert_id: str) -> Optional[AlertResponse]:
                 .execute()
             )
             if response.data:
-                return AlertResponse(**response.data[0])
+                return AlertResponse.model_validate(response.data[0])
         except Exception as e:
             logger.error(f"Failed to fetch alert {alert_id} from Supabase: {e}")
 
@@ -138,7 +138,7 @@ def resolve_alert(alert_id: str) -> Optional[AlertResponse]:
                 .execute()
             )
             if response.data:
-                return AlertResponse(**response.data[0])
+                return AlertResponse.model_validate(response.data[0])
         except Exception as e:
             logger.error(f"Failed to resolve alert {alert_id} in Supabase: {e}")
 
