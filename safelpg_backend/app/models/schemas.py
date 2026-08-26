@@ -1,11 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
 class SensorReading(BaseModel):
     device_id: str
     gas_level: float
-    timestamp: datetime = datetime.now()
+    temperature: Optional[float] = None
+    regulator_state: bool
+    human_presence: bool
+    battery_level: Optional[int] = None
+    timestamp: datetime = Field(default_factory=datetime.now)
 
 class DeviceStatus(BaseModel):
     device_id: str
